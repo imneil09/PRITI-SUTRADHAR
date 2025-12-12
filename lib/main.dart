@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'screens/splash_screen.dart';
 import 'screens/language_screen.dart';
 import 'screens/role_selection_screen.dart';
@@ -28,15 +29,15 @@ class TrashKariApp extends StatelessWidget {
       title: 'TrashKari',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // primarySwatch: Colors.emerald,
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF9FAFB), // Gray-50
-        fontFamily: 'Roboto', // Or your preferred font
+        scaffoldBackgroundColor: const Color(0xFFF9FAFB),
+        fontFamily: 'Roboto',
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF10B981), // Emerald 500
-          primary: const Color(0xFF059669), // Emerald 600
-          secondary: const Color(0xFF047857), // Emerald 700
+          seedColor: const Color(0xFF10B981),
+          primary: const Color(0xFF059669),
+          secondary: const Color(0xFF047857),
         ),
+        primarySwatch: AppColors.emerald, // ✅ FIXED
       ),
       initialRoute: '/',
       routes: {
@@ -55,8 +56,8 @@ class TrashKariApp extends StatelessWidget {
   }
 }
 
-// Custom Material Color for Emerald
-extension EmeraldColor on Colors {
+// ✅ FIXED: Custom Material Color Class
+class AppColors {
   static const MaterialColor emerald = MaterialColor(
     0xFF10B981,
     <int, Color>{
