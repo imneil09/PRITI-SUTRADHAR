@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
+import 'dart:ui'; // Required for BackdropFilter
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
@@ -26,742 +26,675 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Make scaffold transparent so background image can be seen if placed at root
-      // However, since we are placing it inside tabs, this is fine as is.
-      body: IndexedStack(index: _selectedIndex, children: _widgetOptions),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_outlined),
-            activeIcon: Icon(Icons.dashboard),
-            label: 'Home',
+      extendBody: true, // Important for glass effect behind nav bar
+      body: Stack(
+        children: [
+          // 1. GLOBAL BACKGROUND (Deep Forest Theme)
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF064E3B),
+                  Color(0xFF065F46),
+                  Color(0xFF022C22),
+                ],
+              ),
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            activeIcon: Icon(Icons.account_balance_wallet),
-            label: 'Wallet',
+
+          // 2. ABSTRACT BLOBS (Subtle Glow)
+          Positioned(
+            top: -100,
+            right: -100,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFF10B981).withOpacity(0.15),
+              ),
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
+          Positioned(
+            bottom: 100,
+            left: -50,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFF34D399).withOpacity(0.1),
+              ),
+            ),
           ),
+
+          // 3. MAIN CONTENT
+          IndexedStack(index: _selectedIndex, children: _widgetOptions),
         ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: const Color(0xFF059669),
-        unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        elevation: 10,
-        showUnselectedLabels: true,
+      ),
+
+      // 4. FLOATING ACTION BUTTON (Small, Left Corner)
+      floatingActionButton:
+          _selectedIndex == 0
+              ? Padding(
+                padding: const EdgeInsets.only(bottom: 70.0, left: 10),
+                child: FloatingActionButton(
+                  onPressed:
+                      () => Navigator.pushNamed(context, '/pickup_wizard'),
+                  backgroundColor: const Color(0xFF34D399),
+                  foregroundColor: const Color(0xFF064E3B),
+                  elevation: 10,
+                  shape: const CircleBorder(),
+                  child: const Icon(Icons.add, size: 28),
+                ),
+              )
+              : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+
+      bottomNavigationBar: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.dashboard_outlined),
+                activeIcon: Icon(Icons.dashboard),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.account_balance_wallet_outlined),
+                activeIcon: Icon(Icons.account_balance_wallet),
+                label: 'Wallet',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline),
+                activeIcon: Icon(Icons.person),
+                label: 'Profile',
+              ),
+            ],
+            currentIndex: _selectedIndex,
+            selectedItemColor: const Color(0xFF34D399),
+            unselectedItemColor: Colors.white38,
+            onTap: _onItemTapped,
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: const Color(0xFF064E3B).withOpacity(0.85),
+            elevation: 0,
+            showUnselectedLabels: true,
+            selectedLabelStyle: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       ),
     );
   }
 }
 
-// ================== TAB 1: HOME ==================
+// ================== TAB 1: HOME (FIXED LAYOUT) ==================
 class _HomeTab extends StatelessWidget {
   const _HomeTab();
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final double headerHeight = (size.height * 0.35).clamp(280.0, 380.0);
-
-    return Scaffold(
-      // Set background color to transparent to show the image if needed,
-      // but here we use a Stack to place the image.
-      backgroundColor: Colors.transparent, 
-      body: Stack(
-        fit: StackFit.expand, // Ensures background fills the screen
-        children: [
-          // 1. BACKGROUND IMAGE
-          Image.asset(
-            'assets/HOME PAGE.png',
-            fit: BoxFit.cover,
-          ),
-
-          // 2. MAIN CONTENT
-          Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeader(context, headerHeight),
-                      const SizedBox(height: 24),
-                      _buildPriceChart(context),
-                      const SizedBox(height: 24),
-                      _buildRecentActivity(),
-                      const SizedBox(height: 100), // Space for FAB
-                    ],
-                  ),
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 90),
+        child: Column(
+          children: [
+            // --- HEADER ---
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _GlassTag(
+                  icon: Icons.location_on,
+                  text: 'Assam University, Silchar, Assam',
                 ),
-              ),
-            ],
-          ),
-          
-          // 3. FAB (Floating Action Button)
-          _buildFab(context),
-        ],
-      ),
-    );
-  }
+                const _LogoutButton(),
+              ],
+            ),
 
-  Widget _buildHeader(BuildContext context, double height) {
-    return Container(
-      height: height,
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF059669), Color(0xFF064E3B)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(40),
-          bottomRight: Radius.circular(40),
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            const SizedBox(height: 15),
+
+            // Name & Greeting
+            const SizedBox(
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
-                    children: [
-                      Icon(Icons.location_on, color: Colors.white70, size: 16),
-                      SizedBox(width: 4),
-                      Text(
-                        'HSR Layout, BLR',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    'Hello, Priti!',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
                   ),
-                  const _LogoutButton(
-                    color: Colors.white24,
-                    iconColor: Colors.white,
+                  Text(
+                    "Let's Clean & Earn 👇",
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                 ],
               ),
-              const Spacer(),
-              const Text(
-                'Hello, Priti!',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 30,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const Text(
-                "Let's Clean & Earn 👇",
-                style: TextStyle(color: Colors.white70, fontSize: 16),
-              ),
-              const SizedBox(height: 20),
+            ),
 
-              // Stats Bar
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 15,
+            const SizedBox(height: 15),
+
+            // --- STATS BAR ---
+            _GlassContainer(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _StatItem(
+                    value: '14 kg',
+                    label: 'Recycled',
+                    icon: Icons.recycling,
+                  ),
+                  _VerticalDivider(),
+                  _StatItem(
+                    value: '₹250',
+                    label: 'Earned',
+                    icon: Icons.currency_rupee,
+                  ),
+                  _VerticalDivider(),
+                  _StatItem(value: '180', label: 'Saved', icon: Icons.co2),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            // --- LIVE PICKUP STATUS ---
+            const _LivePickupCard(),
+
+            const SizedBox(height: 15),
+
+            // --- MARKET RATES HEADER ---
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Market Rates',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white24),
+                Text(
+                  '● LIVE',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Color(0xFF34D399),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _StatItem(value: '14 kg', label: 'Recycled'),
-                    _StatItem(value: '₹250', label: 'Earned'),
-                    _StatItem(value: '180', label: 'CO2 Saved'),
-                  ],
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            // --- MARKET RATES GRID (Scrollable) ---
+            Expanded(flex: 4, child: _buildPriceGrid(context)),
+
+            const SizedBox(height: 15),
+
+            // --- RECENT ACTIVITY ---
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Recent Activity',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 20),
-            ],
-          ),
+            ),
+            const SizedBox(height: 8),
+
+            const Expanded(
+              flex: 1,
+              child: _GlassTransactionTile(
+                title: 'Sold Plastic',
+                date: 'Tue, 10 Oct',
+                amount: '+ ₹45',
+                isCredit: true,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildPriceChart(BuildContext context) {
+  Widget _buildPriceGrid(BuildContext context) {
     final List<Map<String, dynamic>> rates = [
+      {'icon': Icons.newspaper, 'name': 'Paper', 'price': '₹10/kg'},
+      {'icon': Icons.water_drop, 'name': 'Plastic', 'price': '₹12/kg'},
+      {'icon': Icons.settings, 'name': 'Iron', 'price': '₹26/kg'},
+      {'icon': Icons.checkroom, 'name': 'Clothes', 'price': '₹15/kg'},
+      {'icon': Icons.computer, 'name': 'E-Waste', 'price': '₹40/kg'},
+      {'icon': Icons.wine_bar, 'name': 'Glass', 'price': '₹2/kg'},
+      // Added extra items to demonstrate scrolling
       {
-        'icon': Icons.newspaper,
-        'name': 'Newspaper',
-        'price': '₹10/kg',
-        'color': Colors.blueGrey,
+        'icon': Icons.battery_charging_full,
+        'name': 'Batteries',
+        'price': '₹50/kg',
       },
-      {
-        'icon': Icons.water_drop,
-        'name': 'Plastic',
-        'price': '₹12/kg',
-        'color': Colors.orange,
-      },
-      {
-        'icon': Icons.settings,
-        'name': 'Iron',
-        'price': '₹26/kg',
-        'color': Colors.blue,
-      },
-      {
-        'icon': Icons.checkroom,
-        'name': 'Clothes',
-        'price': '₹15/kg',
-        'color': Colors.purple,
-      },
-      {
-        'icon': Icons.computer,
-        'name': 'E-Waste',
-        'price': '₹40/kg',
-        'color': Colors.red,
-      },
-      {
-        'icon': Icons.wine_bar,
-        'name': 'Glass',
-        'price': '₹2/kg',
-        'color': Colors.green,
-      },
+      {'icon': Icons.book, 'name': 'Books', 'price': '₹8/kg'},
+      {'icon': Icons.car_repair, 'name': 'Tyres', 'price': '₹5/kg'},
     ];
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Market Rates',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'Live Updates',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 0.4),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: 0.85,
-              crossAxisSpacing: 6,
-              mainAxisSpacing: 4,
-            ),
-            itemCount: rates.length,
-            itemBuilder: (context, index) {
-              return _RateCard(
-                icon: rates[index]['icon'],
-                name: rates[index]['name'],
-                price: rates[index]['price'],
-                color: rates[index]['color'],
-                onTap: () => Navigator.pushNamed(context, '/pickup_wizard'),
-              );
-            },
-          ),
-        ],
+    return GridView.builder(
+      // ✅ CHANGED: Enabled BouncingScrollPhysics to allow scrolling
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.zero, // Remove top padding to align perfectly
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        childAspectRatio: 1.0,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
       ),
-    );
-  }
-
-  Widget _buildRecentActivity() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Recent Activity',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white, // Keep this white for readability
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.grey.shade100),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.check, color: Colors.green),
-                ),
-                const SizedBox(width: 16),
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Sold Plastic',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      'Tue, 10 Oct',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                const Text(
-                  '+ ₹45',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFab(BuildContext context) {
-    return Positioned(
-      bottom: 30,
-      left: 0,
-      right: 0,
-      child: Center(
-        child: GestureDetector(
+      itemCount: rates.length,
+      itemBuilder: (context, index) {
+        return _GlassRateCard(
+          icon: rates[index]['icon'],
+          name: rates[index]['name'],
+          price: rates[index]['price'],
           onTap: () => Navigator.pushNamed(context, '/pickup_wizard'),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 21, 104, 13),
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 15,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.add, color: Color.fromARGB(255, 242, 245, 244)),
-                SizedBox(width: 8),
-                Text(
-                  'Schedule Pickup',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
-// ================== TAB 2: WALLET (Redesigned) ==================
+// ================== TAB 2: WALLET ==================
 class _WalletTab extends StatelessWidget {
   const _WalletTab();
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final double headerHeight = (size.height * 0.35).clamp(280.0, 350.0);
-
-    return Scaffold(
-      backgroundColor: Colors.transparent, // Allow potential global background
-      body: Stack(
-         fit: StackFit.expand,
-         children: [
-            // Background Image
-            Image.asset(
-              'assets/HOME PAGE.jpg',
-              fit: BoxFit.cover,
-            ),
-            
-            // Content
-            Column(
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Custom Wallet Header
-                Container(
-                  height: headerHeight,
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF059669), Color(0xFF064E3B)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(40),
-                      bottomRight: Radius.circular(40),
-                    ),
-                  ),
-                  child: SafeArea(
-                    bottom: false,
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        children: [
-                          const Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              SizedBox(width: 40), // Balance center alignment
-                              Text(
-                                'Wallet',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              _LogoutButton(
-                                color: Colors.white24,
-                                iconColor: Colors.white,
-                              ),
-                            ],
-                          ),
-                          const Spacer(),
-                          const Text(
-                            'Total Balance',
-                            style: TextStyle(color: Colors.white70, fontSize: 14),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            '₹265.00',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 40,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.trending_up,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                                SizedBox(width: 8),
-                                Text(
-                                  '+ ₹45 this week',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const Spacer(),
-                        ],
-                      ),
-                    ),
+                SizedBox(width: 40),
+                Text(
+                  'Wallet',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
+                _LogoutButton(),
+              ],
+            ),
+            const Spacer(flex: 1),
+            const Text(
+              'Total Balance',
+              style: TextStyle(color: Colors.white60, fontSize: 16),
+            ),
+            const Text(
+              '₹265.00',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 48,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
 
-                // Body Content
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      children: [
-                        // Quick Actions
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _WalletActionButton(
-                              icon: Icons.add,
-                              label: 'Add Bank',
-                              onTap: () {},
-                            ),
-                            _WalletActionButton(
-                              icon: Icons.qr_code_scanner,
-                              label: 'Add Scanner',
-                              onTap: () {},
-                            ),
-                            _WalletActionButton(
-                              icon: Icons.arrow_downward,
-                              label: 'Withdraw',
-                              onTap: () {},
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 30),
+            const SizedBox(height: 20),
+            _GlassTag(icon: Icons.trending_up, text: '+ ₹45 this week'),
 
-                        // Transactions List
-                        const Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Transactions',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              'View All',
-                              style: TextStyle(
-                                color: Color(0xFF059669),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        const _TransactionTile(
-                          title: 'Sold Plastic',
-                          date: 'Tue, 10 Oct',
-                          amount: '+ ₹45',
-                          isCredit: true,
-                        ),
-                        const _TransactionTile(
-                          title: 'Sold Clothes',
-                          date: 'Sat, 05 Oct',
-                          amount: '+ ₹120',
-                          isCredit: true,
-                        ),
-                        const _TransactionTile(
-                          title: 'Bank Withdrawal',
-                          date: 'Fri, 01 Oct',
-                          amount: '- ₹500',
-                          isCredit: false,
-                        ),
-                        const _TransactionTile(
-                          title: 'Sold Iron',
-                          date: 'Mon, 28 Sep',
-                          amount: '+ ₹500',
-                          isCredit: true,
-                        ),
-                      ],
-                    ),
-                  ),
+            const Spacer(flex: 1),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _GlassActionButton(
+                  icon: Icons.add,
+                  label: 'Add Bank',
+                  onTap: () {},
+                ),
+                _GlassActionButton(
+                  icon: Icons.qr_code_scanner,
+                  label: 'Scan',
+                  onTap: () {},
+                ),
+                _GlassActionButton(
+                  icon: Icons.arrow_downward,
+                  label: 'Withdraw',
+                  onTap: () {},
                 ),
               ],
             ),
-         ],
+            const Spacer(flex: 1),
+
+            // Transactions Area
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white10),
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Recent Transactions',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  _GlassTransactionTile(
+                    title: 'Sold Clothes',
+                    date: 'Sat, 07 Oct',
+                    amount: '+ ₹45',
+                    isCredit: true,
+                  ),
+                  SizedBox(height: 10),
+                  _GlassTransactionTile(
+                    title: 'Sold Clothes',
+                    date: 'Sat, 06 Oct',
+                    amount: '+ ₹100',
+                    isCredit: true,
+                  ),
+                  SizedBox(height: 10),
+                  _GlassTransactionTile(
+                    title: 'Sold Clothes',
+                    date: 'Sat, 05 Oct',
+                    amount: '+ ₹120',
+                    isCredit: true,
+                  ),
+                  SizedBox(height: 10),
+                  _GlassTransactionTile(
+                    title: 'Withdrawal',
+                    date: 'Fri, 01 Oct',
+                    amount: '- ₹500',
+                    isCredit: false,
+                  ),
+                  SizedBox(height: 10),
+                  _GlassTransactionTile(
+                    title: 'Sold Clothes',
+                    date: 'Fri, 01 Oct',
+                    amount: '- ₹500',
+                    isCredit: true,
+                  ),
+                ],
+              ),
+            ),
+            const Spacer(flex: 2),
+          ],
+        ),
       ),
     );
   }
 }
 
-// ================== TAB 3: PROFILE (Redesigned) ==================
+// ================== TAB 3: PROFILE ==================
 class _ProfileTab extends StatelessWidget {
   const _ProfileTab();
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final double headerHeight = (size.height * 0.35).clamp(280.0, 350.0);
-
-    return Scaffold(
-      backgroundColor: Colors.transparent, // Allow potential global background
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-           // Background Image
-           Image.asset(
-             'assets/HOME PAGE.jpg',
-             fit: BoxFit.cover,
-           ),
-           
-           // Content
-           Column(
-            children: [
-              // Custom Profile Header
-              Container(
-                height: headerHeight,
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF059669), Color(0xFF064E3B)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            const Align(
+              alignment: Alignment.centerRight,
+              child: _LogoutButton(),
+            ),
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF34D399), width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF34D399).withOpacity(0.3),
+                    blurRadius: 20,
                   ),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(40),
-                    bottomRight: Radius.circular(40),
-                  ),
-                ),
-                child: SafeArea(
-                  bottom: false,
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      children: [
-                        const Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            SizedBox(width: 40), // Center alignment trick
-                            Text(
-                              'Profile',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            _LogoutButton(
-                              color: Colors.white24,
-                              iconColor: Colors.white,
-                            ),
-                          ],
-                        ),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.white30,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const CircleAvatar(
-                            radius: 46,
-                            backgroundColor: Colors.white,
-                            backgroundImage: AssetImage(
-                              'assets/priti.jpeg',
-                            ), 
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Priti Sutradhar',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const Text(
-                          '+91 70059 48459',
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                        const Spacer(),
-                      ],
-                    ),
-                  ),
-                ),
+                ],
               ),
-
-              // Body Content
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    children: [
-                      _buildProfileOption(Icons.location_on_outlined, 'Addresses'),
-                      _buildProfileOption(Icons.history, 'Order History'),
-                      _buildProfileOption(
-                        Icons.account_balance_wallet_outlined,
-                        'Payment Report',
-                      ),
-                      _buildProfileOption(
-                        Icons.notifications_outlined,
-                        'Notifications',
-                      ),
-                      _buildProfileOption(Icons.help_outline, 'Help & Support'),
-                      _buildProfileOption(Icons.info_outline, 'About Us'),
-                    ],
-                  ),
-                ),
+              child: const CircleAvatar(
+                radius: 45,
+                backgroundImage: AssetImage('assets/priti.jpeg'),
               ),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Priti Sutradhar',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const Text(
+              '+91 70059 48459',
+              style: TextStyle(color: Colors.white60),
+            ),
+
+            const SizedBox(height: 30),
+
+            Expanded(
+              child: ListView(
+                physics: const BouncingScrollPhysics(),
+                children: [
+                  _buildGlassProfileOption(
+                    Icons.location_on_outlined,
+                    'Addresses',
+                  ),
+                  _buildGlassProfileOption(Icons.history, 'Order History'),
+                  _buildGlassProfileOption(
+                    Icons.account_balance_wallet_outlined,
+                    'Payment Report',
+                  ),
+                  _buildGlassProfileOption(
+                    Icons.notifications_outlined,
+                    'Notifications',
+                  ),
+                  _buildGlassProfileOption(
+                    Icons.help_outline,
+                    'Help & Support',
+                  ),
+                  _buildGlassProfileOption(Icons.info_outline, 'About Us'),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildProfileOption(IconData icon, String title) {
+  Widget _buildGlassProfileOption(IconData icon, String title) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: const Color(0xFFECFDF5),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, color: const Color(0xFF059669)),
+      margin: const EdgeInsets.only(bottom: 10),
+      child: _GlassContainer(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          children: [
+            Icon(icon, color: const Color(0xFF34D399), size: 20),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Colors.white38, size: 20),
+          ],
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-        trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-        onTap: () {},
       ),
     );
   }
 }
 
-// ================== SHARED WIDGETS ==================
+// ================== HELPER WIDGETS ==================
 
-class _RateCard extends StatelessWidget {
+class _LivePickupCard extends StatelessWidget {
+  const _LivePickupCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return _GlassContainer(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          // Icon Box
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF34D399).withOpacity(0.15),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0xFF34D399).withOpacity(0.3),
+              ),
+            ),
+            child: const Icon(
+              Icons.local_shipping,
+              color: Color(0xFF34D399),
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+
+          // Details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Pickup #8492",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      "In Progress",
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Color(0xFF34D399),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                LinearProgressIndicator(
+                  value: 0.6,
+                  backgroundColor: Colors.white12,
+                  color: const Color(0xFF34D399),
+                  minHeight: 4,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  "Partner is arriving in 15 mins",
+                  style: TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GlassContainer extends StatelessWidget {
+  final Widget child;
+  final EdgeInsets padding;
+  const _GlassContainer({required this.child, required this.padding});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.08),
+            border: Border.all(color: Colors.white.withOpacity(0.1)),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassTag extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  const _GlassTag({required this.icon, required this.text});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFF34D399).withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF34D399).withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: const Color(0xFF34D399), size: 14),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Color(0xFF34D399),
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GlassRateCard extends StatelessWidget {
   final IconData icon;
   final String name, price;
-  final MaterialColor color;
   final VoidCallback onTap;
 
-  const _RateCard({
+  const _GlassRateCard({
     required this.icon,
     required this.name,
     required this.price,
-    required this.color,
     required this.onTap,
   });
 
@@ -769,41 +702,94 @@ class _RateCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey.shade100),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+      child: _GlassContainer(
+        padding: const EdgeInsets.all(8),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: color.shade50,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 24),
-            ),
-            const SizedBox(height: 12),
+            Icon(icon, color: Colors.white, size: 28),
+            const SizedBox(height: 4),
             Text(
               name,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 11,
+                color: Colors.white70,
+              ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
               price,
               style: const TextStyle(
-                color: Color(0xFF059669),
+                color: Color(0xFF34D399),
                 fontWeight: FontWeight.w900,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassTransactionTile extends StatelessWidget {
+  final String title, date, amount;
+  final bool isCredit;
+  const _GlassTransactionTile({
+    required this.title,
+    required this.date,
+    required this.amount,
+    required this.isCredit,
+  });
+  @override
+  Widget build(BuildContext context) {
+    return _GlassContainer(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+      child: Center(
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color:
+                    isCredit
+                        ? const Color(0xFF34D399).withOpacity(0.2)
+                        : Colors.redAccent.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                isCredit ? Icons.arrow_downward : Icons.arrow_upward,
+                color: isCredit ? const Color(0xFF34D399) : Colors.redAccent,
+                size: 16,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    date,
+                    style: const TextStyle(fontSize: 10, color: Colors.white54),
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              amount,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: isCredit ? const Color(0xFF34D399) : Colors.redAccent,
                 fontSize: 14,
               ),
             ),
@@ -814,17 +800,15 @@ class _RateCard extends StatelessWidget {
   }
 }
 
-class _WalletActionButton extends StatelessWidget {
+class _GlassActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-
-  const _WalletActionButton({
+  const _GlassActionButton({
     required this.icon,
     required this.label,
     required this.onTap,
   });
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -832,30 +816,23 @@ class _WalletActionButton extends StatelessWidget {
         GestureDetector(
           onTap: onTap,
           child: Container(
-            width: 60,
-            height: 60,
+            width: 50,
+            height: 50,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.white.withOpacity(0.1),
               shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-              border: Border.all(color: Colors.grey.shade100),
+              border: Border.all(color: Colors.white24),
             ),
-            child: Icon(icon, color: const Color(0xFF059669), size: 28),
+            child: Icon(icon, color: const Color(0xFF34D399), size: 24),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         Text(
           label,
           style: const TextStyle(
-            fontSize: 12,
+            fontSize: 10,
             fontWeight: FontWeight.bold,
-            color: Colors.grey,
+            color: Colors.white70,
           ),
         ),
       ],
@@ -864,20 +841,24 @@ class _WalletActionButton extends StatelessWidget {
 }
 
 class _LogoutButton extends StatelessWidget {
-  final Color color;
-  final Color iconColor;
-  const _LogoutButton({required this.color, required this.iconColor});
-
+  const _LogoutButton();
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap:
-          () =>
-              Navigator.pushNamedAndRemoveUntil(context, '/role', (route) => false),
+          () => Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/role',
+            (route) => false,
+          ),
       child: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        child: Icon(Icons.logout, color: iconColor, size: 20),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.1),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white12),
+        ),
+        child: const Icon(Icons.logout, color: Colors.white, size: 18),
       ),
     );
   }
@@ -885,88 +866,43 @@ class _LogoutButton extends StatelessWidget {
 
 class _StatItem extends StatelessWidget {
   final String value, label;
-  const _StatItem({required this.value, required this.label});
+  final IconData icon;
+  const _StatItem({
+    required this.value,
+    required this.label,
+    required this.icon,
+  });
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        Icon(icon, color: const Color(0xFF34D399), size: 18),
+        const SizedBox(height: 4),
         Text(
           value,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 14,
           ),
         ),
         Text(
           label.toUpperCase(),
-          style: const TextStyle(color: Colors.white70, fontSize: 10),
+          style: const TextStyle(
+            color: Colors.white54,
+            fontSize: 8,
+            letterSpacing: 1,
+          ),
         ),
       ],
     );
   }
 }
 
-class _TransactionTile extends StatelessWidget {
-  final String title, date, amount;
-  final bool isCredit;
-  const _TransactionTile({
-    required this.title,
-    required this.date,
-    required this.amount,
-    required this.isCredit,
-  });
-
+class _VerticalDivider extends StatelessWidget {
+  const _VerticalDivider();
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isCredit ? Colors.green.shade50 : Colors.red.shade50,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              isCredit ? Icons.arrow_downward : Icons.arrow_upward,
-              color: isCredit ? Colors.green : Colors.red,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  date,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            amount,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: isCredit ? Colors.green : Colors.red,
-              fontSize: 16,
-            ),
-          ),
-        ],
-      ),
-    );
+    return Container(width: 1, height: 20, color: Colors.white24);
   }
 }

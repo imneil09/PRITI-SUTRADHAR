@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:trashkari/screens/partner_register.dart';
 
 import 'screens/splash_screen.dart';
 import 'screens/language_screen.dart';
@@ -72,6 +73,7 @@ class TrashKariApp extends StatelessWidget {
         '/partner_home': (context) => const PartnerHomeScreen(),
         '/partner_payment': (context) => const PartnerPaymentScreen(),
         '/payment_success': (context) => const PaymentSuccessScreen(),
+        '/partner_register': (context) => const PartnerRegistrationScreen(),
       },
     );
   }

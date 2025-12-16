@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
+import 'dart:ui'; // Required for BackdropFilter
 
 class PartnerHomeScreen extends StatefulWidget {
   const PartnerHomeScreen({super.key});
@@ -26,33 +26,96 @@ class _PartnerHomeScreenState extends State<PartnerHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _selectedIndex, children: _widgetOptions),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_outlined),
-            activeIcon: Icon(Icons.dashboard),
-            label: 'Home',
+      extendBody: true, // For glass effect behind nav bar
+      body: Stack(
+        children: [
+          // 1. GLOBAL BACKGROUND
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF064E3B),
+                  Color(0xFF065F46),
+                  Color(0xFF022C22),
+                ],
+              ),
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.payment_outlined),
-            activeIcon: Icon(Icons.payment),
-            label: 'Payouts',
+
+          // 2. ABSTRACT BLOBS
+          Positioned(
+            top: -100,
+            right: -100,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFF10B981).withOpacity(0.15),
+              ),
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_outlined),
-            activeIcon: Icon(Icons.account_balance),
-            label: 'Finance',
+          Positioned(
+            bottom: 100,
+            left: -50,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFF34D399).withOpacity(0.1),
+              ),
+            ),
           ),
+
+          // 3. MAIN CONTENT
+          IndexedStack(index: _selectedIndex, children: _widgetOptions),
         ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: const Color(0xFF059669),
-        unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        elevation: 10,
-        showUnselectedLabels: true,
+      ),
+
+      // 4. BOTTOM NAVIGATION BAR
+      bottomNavigationBar: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.dashboard_outlined),
+                activeIcon: Icon(Icons.dashboard),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.payment_outlined),
+                activeIcon: Icon(Icons.payment),
+                label: 'Payouts',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.account_balance_outlined),
+                activeIcon: Icon(Icons.account_balance),
+                label: 'Finance',
+              ),
+            ],
+            currentIndex: _selectedIndex,
+            selectedItemColor: const Color(0xFF34D399),
+            unselectedItemColor: Colors.white38,
+            onTap: _onItemTapped,
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: const Color(0xFF064E3B).withOpacity(0.85),
+            elevation: 0,
+            showUnselectedLabels: true,
+            selectedLabelStyle: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -71,239 +134,196 @@ class _HomeTabState extends State<_HomeTab> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final double headerHeight = (size.height * 0.32).clamp(280.0, 360.0);
-
-    return Scaffold(
-      body: Column(
-        children: [
-          // Header
-          Container(
-            height: headerHeight,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF059669), Color(0xFF064E3B)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(40),
-                bottomRight: Radius.circular(40),
-              ),
-            ),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white24,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon(
-                                Icons.circle,
-                                color: Colors.greenAccent,
-                                size: 10,
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                "ONLINE",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const _LogoutButton(),
-                      ],
-                    ),
-                    const Spacer(),
-                    const Text(
-                      'Partner Dashboard',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Glass Stats
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 15,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.white24),
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _StatItem(value: '₹850', label: "Today's Pay"),
-                          _StatItem(value: '1314 kg', label: 'Collected'),
-                          _StatItem(value: '4', label: 'Pending'),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // Toggle & List
-          Expanded(
-            child: Column(
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+        child: Column(
+          children: [
+            // --- HEADER ---
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const SizedBox(height: 20),
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 24),
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
                   ),
-                  child: Row(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF34D399).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFF34D399).withOpacity(0.3),
+                    ),
+                  ),
+                  child: const Row(
                     children: [
-                      Expanded(
-                        child: _TabButton(
-                          text: "New Requests",
-                          active: isNewRequests,
-                          onTap: () => setState(() => isNewRequests = true),
-                        ),
-                      ),
-                      Expanded(
-                        child: _TabButton(
-                          text: "Pickups",
-                          active: !isNewRequests,
-                          onTap: () => setState(() => isNewRequests = false),
+                      Icon(Icons.circle, color: Color(0xFF34D399), size: 8),
+                      SizedBox(width: 6),
+                      Text(
+                        "ONLINE",
+                        style: TextStyle(
+                          color: Color(0xFF34D399),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                          letterSpacing: 1,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child:
-                      isNewRequests
-                          ? _buildNewRequestsList()
-                          : _buildActivePickup(context),
-                ),
+                const _LogoutButton(),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Partner Dashboard',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -1,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // --- GLASS STATS ---
+            _GlassContainer(
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _StatItem(value: '₹850', label: "Today's Pay"),
+                  _VerticalDivider(),
+                  _StatItem(value: '1314 kg', label: 'Collected'),
+                  _VerticalDivider(),
+                  _StatItem(value: '4', label: 'Pending'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // --- TOGGLE SWITCH ---
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _TabButton(
+                      text: "New Requests",
+                      active: isNewRequests,
+                      onTap: () => setState(() => isNewRequests = true),
+                    ),
+                  ),
+                  Expanded(
+                    child: _TabButton(
+                      text: "Pickups",
+                      active: !isNewRequests,
+                      onTap: () => setState(() => isNewRequests = false),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // --- LIST ---
+            Expanded(
+              child:
+                  isNewRequests
+                      ? _buildNewRequestsList()
+                      : _buildActivePickup(context),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildNewRequestsList() {
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      physics: const BouncingScrollPhysics(),
       children: const [
         _RequestCard(
           title: "Plastic",
           weight: "5.0 kg",
-          loc: "2.5 km • Sector 4",
+          loc: "2.5 km • Silchar, Assam",
           color: Colors.orange,
         ),
         _RequestCard(
           title: "Newspaper",
           weight: "5.0 kg",
-          loc: "2.5 km • Sector 4",
-          color: Colors.orange,
+          loc: "2.5 km • Silchar, Assam",
+          color: Colors.blueGrey,
         ),
-        _RequestCard(
-          title: "E-Waste",
-          weight: "5.0 kg",
-          loc: "2.5 km • Sector 4",
-          color: Colors.orange,
-        ),
-
-        _RequestCard(
-          title: "Clothes",
-          weight: "12.0 kg",
-          loc: "1.2 km • Green Park",
-          color: Colors.purple,
-        ),
+        SizedBox(height: 80), // Bottom padding for nav bar
       ],
     );
   }
 
   Widget _buildActivePickup(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      physics: const BouncingScrollPhysics(),
       children: [
-        Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFF10B981), width: 2),
-            boxShadow: [
-              BoxShadow(color: Colors.green.withOpacity(0.1), blurRadius: 20),
-            ],
-          ),
+        _GlassContainer(
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF10B981),
-                  borderRadius: BorderRadius.only(
-                    bottomRight: Radius.circular(8),
-                  ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF34D399),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: const Text(
                   "IN PROGRESS",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF064E3B),
                     fontWeight: FontWeight.bold,
                     fontSize: 10,
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               const Text(
-                "Plastic",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                "Plastic Pickup",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
-              const Text("Ms Priti Sutradhar", style: TextStyle(color: Colors.grey)),
+              const Text(
+                "Ms Priti Sutradhar",
+                style: TextStyle(color: Colors.white70),
+              ),
               const SizedBox(height: 20),
+
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey[50],
+                  color: Colors.white.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white10),
                 ),
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Address"),
+                    Text("Address", style: TextStyle(color: Colors.white60)),
                     Text(
-                      "Sector 4, Main Rd",
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      "Silchar, Assam",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),
@@ -314,20 +334,18 @@ class _HomeTabState extends State<_HomeTab> {
                 height: 50,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF059669),
+                    backgroundColor: const Color(0xFF34D399),
+                    foregroundColor: const Color(0xFF064E3B),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   onPressed:
                       () => Navigator.pushNamed(context, '/partner_payment'),
-                  icon: const Icon(Icons.scale, color: Colors.white),
+                  icon: const Icon(Icons.scale),
                   label: const Text(
                     "Weigh & Pay",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
               ),
@@ -339,261 +357,223 @@ class _HomeTabState extends State<_HomeTab> {
   }
 }
 
-// ================== TAB 2: USER PAYMENTS (Payouts) ==================
+// ================== TAB 2: PAYOUTS ==================
 class _UserPaymentsTab extends StatelessWidget {
   const _UserPaymentsTab();
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final double headerHeight = (size.height * 0.25).clamp(220.0, 300.0);
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+        child: Column(
+          children: [
+            const Align(
+              alignment: Alignment.centerRight,
+              child: _LogoutButton(),
+            ),
+            const SizedBox(height: 20),
 
-    return Scaffold(
-      body: Column(
-        children: [
-          Container(
-            height: headerHeight,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF059669), Color(0xFF064E3B)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(40),
-                bottomRight: Radius.circular(40),
+            const Text(
+              'Payouts',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [_LogoutButton()],
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Payouts',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white24,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        'Total Paid: ₹13,14450',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
+            const SizedBox(height: 10),
+
+            _GlassContainer(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: const Text(
+                'Total Paid: ₹13,144',
+                style: TextStyle(
+                  color: Color(0xFF34D399),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
               ),
             ),
-          ),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(24),
-              children: const [
-                Text(
-                  "Recent Transactions",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            const SizedBox(height: 30),
+
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Recent Transactions",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-                SizedBox(height: 16),
-                _TransactionTile(
-                  name: "Priti Sutradhar",
-                  date: "Today, 10:30 AM",
-                  amount: "- ₹45",
-                  status: "Success",
-                ),
-                _TransactionTile(
-                  name: "Sneha Dey",
-                  date: "Today, 10:30 AM",
-                  amount: "- ₹120",
-                  status: "Success",
-                ),
-                _TransactionTile(
-                  name: "Priti Sutradhar",
-                  date: "Today, 10:30 AM",
-                  amount: "- ₹45",
-                  status: "Success",
-                ),
-                _TransactionTile(
-                  name: "Sneha Dey",
-                  date: "Yesterday",
-                  amount: "- ₹120",
-                  status: "Success",
-                ),
-                _TransactionTile(
-                  name: "Rahul Saha",
-                  date: "12 Oct",
-                  amount: "- ₹45",
-                  status: "Success",
-                ),
-                _TransactionTile(
-                  name: "Rahul Saha",
-                  date: "12 Oct",
-                  amount: "- ₹45",
-                  status: "Success",
-                ),
-                _TransactionTile(
-                  name: "Rasmita Saha",
-                  date: "10 Oct",
-                  amount: "- ₹200",
-                  status: "Failed",
-                ),
-                _TransactionTile(
-                  name: "Sagar Bhowmik",
-                  date: "10 Oct",
-                  amount: "- ₹200",
-                  status: "Failed",
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+
+            Expanded(
+              child: ListView(
+                physics: const BouncingScrollPhysics(),
+                children: const [
+                  _GlassTransactionTile(
+                    name: "Priti Sutradhar",
+                    date: "Today, 10:30 AM",
+                    amount: "- ₹45",
+                    status: "Success",
+                  ),
+                  _GlassTransactionTile(
+                    name: "Sneha Dey",
+                    date: "Today, 10:30 AM",
+                    amount: "- ₹120",
+                    status: "Success",
+                  ),
+                  _GlassTransactionTile(
+                    name: "Rahul Saha",
+                    date: "12 Oct",
+                    amount: "- ₹45",
+                    status: "Success",
+                  ),
+                  _GlassTransactionTile(
+                    name: "Rasmita Saha",
+                    date: "10 Oct",
+                    amount: "- ₹200",
+                    status: "Failed",
+                  ),
+                  _GlassTransactionTile(
+                    name: "Sagar Bhowmik",
+                    date: "10 Oct",
+                    amount: "- ₹200",
+                    status: "Failed",
+                  ),
+
+                  SizedBox(height: 80),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-// ================== TAB 3: COMPANY FINANCE ==================
+// ================== TAB 3: FINANCE ==================
 class _CompanyFinanceTab extends StatelessWidget {
   const _CompanyFinanceTab();
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final double headerHeight = (size.height * 0.35).clamp(280.0, 360.0);
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+        child: Column(
+          children: [
+            const Align(
+              alignment: Alignment.centerRight,
+              child: _LogoutButton(),
+            ),
+            const SizedBox(height: 40),
+            const Text(
+              'TrashKari Finance',
+              style: TextStyle(color: Colors.white60, letterSpacing: 1),
+            ),
+            const Text(
+              '₹ 15,240',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 48,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 30),
 
-    return Scaffold(
-      body: Column(
-        children: [
-          Container(
-            height: headerHeight,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF1F2937), Color(0xFF111827)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(40),
-                bottomRight: Radius.circular(40),
-              ),
-            ),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  children: [
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [_LogoutButton()],
-                    ),
-                    const Spacer(),
-                    const Text(
-                      'TrashKari Finance',
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                    const Text(
-                      '₹ 15,240',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 40,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF059669),
-                            foregroundColor: Colors.white,
-                          ),
-                          icon: const Icon(Icons.add, size: 16,color: Colors.white,),
-                          label: const Text("Add Request"),
-                        ),
-                        const SizedBox(width: 12),
-                        OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.white24),
-                            foregroundColor: Colors.white,
-                          ),
-                          child: const Text("History"),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 30),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildFinanceOption(Icons.receipt_long, "Invoices"),
-                _buildFinanceOption(Icons.pie_chart, "Earnings Report"),
-                _buildFinanceOption(Icons.calculate, "Export Ledger"),
-                _buildFinanceOption(Icons.support_agent, "Finance Support"),
+                _GlassActionButton(
+                  icon: Icons.add,
+                  label: "Add Request",
+                  onTap: () {},
+                ),
+                const SizedBox(width: 20),
+                _GlassActionButton(
+                  icon: Icons.history,
+                  label: "History",
+                  onTap: () {},
+                ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 40),
+
+            Expanded(
+              child: ListView(
+                physics: const BouncingScrollPhysics(),
+                children: [
+                  _buildGlassOption(Icons.receipt_long, "Invoices"),
+                  _buildGlassOption(Icons.pie_chart, "Earnings Report"),
+                  _buildGlassOption(Icons.calculate, "Export Ledger"),
+                  _buildGlassOption(Icons.support_agent, "Finance Support"),
+                  const SizedBox(height: 80),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildFinanceOption(IconData icon, String title) {
+  Widget _buildGlassOption(IconData icon, String title) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        tileColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.grey.shade100),
+      child: _GlassContainer(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Icon(icon, color: const Color(0xFF34D399), size: 20),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Colors.white38),
+          ],
         ),
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, color: Colors.black87),
-        ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        trailing: const Icon(Icons.chevron_right, color: Colors.grey),
       ),
     );
   }
 }
 
 // ================== SHARED WIDGETS ==================
+
+class _GlassContainer extends StatelessWidget {
+  final Widget child;
+  final EdgeInsets padding;
+  const _GlassContainer({required this.child, required this.padding});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.08),
+            border: Border.all(color: Colors.white.withOpacity(0.1)),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
 
 class _TabButton extends StatelessWidget {
   final String text;
@@ -612,24 +592,15 @@ class _TabButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: active ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow:
-              active
-                  ? [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 4,
-                    ),
-                  ]
-                  : [],
+          color: active ? const Color(0xFF34D399) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Center(
           child: Text(
             text,
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: active ? const Color(0xFF059669) : Colors.grey,
+              color: active ? const Color(0xFF064E3B) : Colors.white60,
             ),
           ),
         ),
@@ -655,7 +626,11 @@ class _StatItem extends StatelessWidget {
         ),
         Text(
           label.toUpperCase(),
-          style: const TextStyle(color: Colors.white70, fontSize: 10),
+          style: const TextStyle(
+            color: Colors.white54,
+            fontSize: 10,
+            letterSpacing: 0.5,
+          ),
         ),
       ],
     );
@@ -668,15 +643,19 @@ class _LogoutButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap:
-          () =>
-              Navigator.pushNamedAndRemoveUntil(context, '/role', (route) => false),
+          () => Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/role',
+            (route) => false,
+          ),
       child: Container(
         padding: const EdgeInsets.all(8),
-        decoration: const BoxDecoration(
-          color: Colors.white24,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.1),
           shape: BoxShape.circle,
+          border: Border.all(color: Colors.white12),
         ),
-        child: const Icon(Icons.logout, color: Colors.white, size: 20),
+        child: const Icon(Icons.logout, color: Colors.white, size: 18),
       ),
     );
   }
@@ -694,121 +673,116 @@ class _RequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: color.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(Icons.recycling, color: color),
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: _GlassContainer(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      Text(
-                        loc,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
+                      child: Icon(Icons.recycling, color: color[200]),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
+                        Text(
+                          loc,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.white54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      weight,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF34D399),
                       ),
-                    ],
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    weight,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
                     ),
-                  ),
-                  const Text(
-                    "EST.",
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey,
+                    const Text(
+                      "EST.",
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white38,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {},
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white54,
+                      side: const BorderSide(color: Colors.white12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    "Reject",
-                    style: TextStyle(color: Colors.grey),
+                    child: const Text("Reject"),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1F2937),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF34D399),
+                      foregroundColor: const Color(0xFF064E3B),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: () {},
+                    child: const Text(
+                      "Accept",
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
-                  onPressed: () {},
-                  child: const Text(
-                    "Accept",
-                    style: TextStyle(color: Colors.white),
-                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _TransactionTile extends StatelessWidget {
+class _GlassTransactionTile extends StatelessWidget {
   final String name, date, amount, status;
-  const _TransactionTile({
+  const _GlassTransactionTile({
     required this.name,
     required this.date,
     required this.amount,
@@ -818,66 +792,118 @@ class _TransactionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isSuccess = status == "Success";
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isSuccess ? Colors.green.shade50 : Colors.red.shade50,
-              borderRadius: BorderRadius.circular(12),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: _GlassContainer(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color:
+                    isSuccess
+                        ? const Color(0xFF34D399).withOpacity(0.2)
+                        : Colors.redAccent.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                isSuccess ? Icons.check : Icons.close,
+                color: isSuccess ? const Color(0xFF34D399) : Colors.redAccent,
+                size: 16,
+              ),
             ),
-            child: Icon(
-              isSuccess ? Icons.check : Icons.close,
-              color: isSuccess ? Colors.green : Colors.red,
-              size: 20,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "To: $name",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    date,
+                    style: const TextStyle(fontSize: 12, color: Colors.white54),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  "To: $name",
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  amount,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
                 ),
                 Text(
-                  date,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  status,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color:
+                        isSuccess ? const Color(0xFF34D399) : Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _GlassActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: const Color(0xFF34D399).withOpacity(0.2),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0xFF34D399).withOpacity(0.4),
+              ),
+            ),
+            child: Icon(icon, color: const Color(0xFF34D399)),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                amount,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              Text(
-                status,
-                style: TextStyle(
-                  fontSize: 10,
-                  color: isSuccess ? Colors.green : Colors.red,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white70, fontSize: 12),
           ),
         ],
       ),
     );
+  }
+}
+
+class _VerticalDivider extends StatelessWidget {
+  const _VerticalDivider();
+  @override
+  Widget build(BuildContext context) {
+    return Container(width: 1, height: 20, color: Colors.white24);
   }
 }
