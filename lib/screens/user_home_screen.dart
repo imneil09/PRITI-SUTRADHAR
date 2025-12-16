@@ -26,6 +26,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Make scaffold transparent so background image can be seen if placed at root
+      // However, since we are placing it inside tabs, this is fine as is.
       body: IndexedStack(index: _selectedIndex, children: _widgetOptions),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -68,21 +70,40 @@ class _HomeTab extends StatelessWidget {
     final double headerHeight = (size.height * 0.35).clamp(280.0, 380.0);
 
     return Scaffold(
+      // Set background color to transparent to show the image if needed,
+      // but here we use a Stack to place the image.
+      backgroundColor: Colors.transparent, 
       body: Stack(
+        fit: StackFit.expand, // Ensures background fills the screen
         children: [
-          SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(context, headerHeight),
-                const SizedBox(height: 24),
-                _buildPriceChart(context),
-                const SizedBox(height: 24),
-                _buildRecentActivity(),
-                const SizedBox(height: 100), // Space for FAB
-              ],
-            ),
+          // 1. BACKGROUND IMAGE
+          Image.asset(
+            'assets/HOME PAGE.png',
+            fit: BoxFit.cover,
           ),
+
+          // 2. MAIN CONTENT
+          Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(context, headerHeight),
+                      const SizedBox(height: 24),
+                      _buildPriceChart(context),
+                      const SizedBox(height: 24),
+                      _buildRecentActivity(),
+                      const SizedBox(height: 100), // Space for FAB
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          
+          // 3. FAB (Floating Action Button)
           _buildFab(context),
         ],
       ),
@@ -278,9 +299,16 @@ class _HomeTab extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.white, // Keep this white for readability
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: Colors.grey.shade100),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Row(
               children: [
@@ -375,176 +403,189 @@ class _WalletTab extends StatelessWidget {
     final double headerHeight = (size.height * 0.35).clamp(280.0, 350.0);
 
     return Scaffold(
-      body: Column(
-        children: [
-          // Custom Wallet Header
-          Container(
-            height: headerHeight,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF059669), Color(0xFF064E3B)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(40),
-                bottomRight: Radius.circular(40),
-              ),
+      backgroundColor: Colors.transparent, // Allow potential global background
+      body: Stack(
+         fit: StackFit.expand,
+         children: [
+            // Background Image
+            Image.asset(
+              'assets/HOME PAGE.jpg',
+              fit: BoxFit.cover,
             ),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  children: [
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        SizedBox(width: 40), // Balance center alignment
-                        Text(
-                          'Wallet',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        _LogoutButton(
-                          color: Colors.white24,
-                          iconColor: Colors.white,
-                        ),
-                      ],
+            
+            // Content
+            Column(
+              children: [
+                // Custom Wallet Header
+                Container(
+                  height: headerHeight,
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF059669), Color(0xFF064E3B)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    const Spacer(),
-                    const Text(
-                      'Total Balance',
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(40),
+                      bottomRight: Radius.circular(40),
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      '₹265.00',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 40,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
+                  ),
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
                         children: [
-                          Icon(
-                            Icons.trending_up,
-                            color: Colors.white,
-                            size: 16,
+                          const Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(width: 40), // Balance center alignment
+                              Text(
+                                'Wallet',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              _LogoutButton(
+                                color: Colors.white24,
+                                iconColor: Colors.white,
+                              ),
+                            ],
                           ),
-                          SizedBox(width: 8),
-                          Text(
-                            '+ ₹45 this week',
+                          const Spacer(),
+                          const Text(
+                            'Total Balance',
+                            style: TextStyle(color: Colors.white70, fontSize: 14),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            '₹265.00',
                             style: TextStyle(
                               color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 40,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
+                          const SizedBox(height: 20),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.trending_up,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  '+ ₹45 this week',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Spacer(),
                         ],
                       ),
                     ),
-                    const Spacer(),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          ),
 
-          // Body Content
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                children: [
-                  // Quick Actions
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _WalletActionButton(
-                        icon: Icons.add,
-                        label: 'Add Bank',
-                        onTap: () {},
-                      ),
-                      _WalletActionButton(
-                        icon: Icons.qr_code_scanner,
-                        label: 'Add Scanner',
-                        onTap: () {},
-                      ),
-                      _WalletActionButton(
-                        icon: Icons.arrow_downward,
-                        label: 'Withdraw',
-                        onTap: () {},
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 30),
+                // Body Content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      children: [
+                        // Quick Actions
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _WalletActionButton(
+                              icon: Icons.add,
+                              label: 'Add Bank',
+                              onTap: () {},
+                            ),
+                            _WalletActionButton(
+                              icon: Icons.qr_code_scanner,
+                              label: 'Add Scanner',
+                              onTap: () {},
+                            ),
+                            _WalletActionButton(
+                              icon: Icons.arrow_downward,
+                              label: 'Withdraw',
+                              onTap: () {},
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 30),
 
-                  // Transactions List
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Transactions',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                        // Transactions List
+                        const Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Transactions',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              'View All',
+                              style: TextStyle(
+                                color: Color(0xFF059669),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      Text(
-                        'View All',
-                        style: TextStyle(
-                          color: Color(0xFF059669),
-                          fontWeight: FontWeight.bold,
+                        const SizedBox(height: 16),
+                        const _TransactionTile(
+                          title: 'Sold Plastic',
+                          date: 'Tue, 10 Oct',
+                          amount: '+ ₹45',
+                          isCredit: true,
                         ),
-                      ),
-                    ],
+                        const _TransactionTile(
+                          title: 'Sold Clothes',
+                          date: 'Sat, 05 Oct',
+                          amount: '+ ₹120',
+                          isCredit: true,
+                        ),
+                        const _TransactionTile(
+                          title: 'Bank Withdrawal',
+                          date: 'Fri, 01 Oct',
+                          amount: '- ₹500',
+                          isCredit: false,
+                        ),
+                        const _TransactionTile(
+                          title: 'Sold Iron',
+                          date: 'Mon, 28 Sep',
+                          amount: '+ ₹500',
+                          isCredit: true,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  const _TransactionTile(
-                    title: 'Sold Plastic',
-                    date: 'Tue, 10 Oct',
-                    amount: '+ ₹45',
-                    isCredit: true,
-                  ),
-                  const _TransactionTile(
-                    title: 'Sold Clothes',
-                    date: 'Sat, 05 Oct',
-                    amount: '+ ₹120',
-                    isCredit: true,
-                  ),
-                  const _TransactionTile(
-                    title: 'Bank Withdrawal',
-                    date: 'Fri, 01 Oct',
-                    amount: '- ₹500',
-                    isCredit: false,
-                  ),
-                  const _TransactionTile(
-                    title: 'Sold Iron',
-                    date: 'Mon, 28 Sep',
-                    amount: '+ ₹500',
-                    isCredit: true,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
-        ],
+         ],
       ),
     );
   }
@@ -560,103 +601,116 @@ class _ProfileTab extends StatelessWidget {
     final double headerHeight = (size.height * 0.35).clamp(280.0, 350.0);
 
     return Scaffold(
-      body: Column(
+      backgroundColor: Colors.transparent, // Allow potential global background
+      body: Stack(
+        fit: StackFit.expand,
         children: [
-          // Custom Profile Header
-          Container(
-            height: headerHeight,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF059669), Color(0xFF064E3B)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(40),
-                bottomRight: Radius.circular(40),
-              ),
-            ),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  children: [
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+           // Background Image
+           Image.asset(
+             'assets/HOME PAGE.jpg',
+             fit: BoxFit.cover,
+           ),
+           
+           // Content
+           Column(
+            children: [
+              // Custom Profile Header
+              Container(
+                height: headerHeight,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF059669), Color(0xFF064E3B)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(40),
+                    bottomRight: Radius.circular(40),
+                  ),
+                ),
+                child: SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
                       children: [
-                        SizedBox(width: 40), // Center alignment trick
-                        Text(
-                          'Profile',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                        const Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(width: 40), // Center alignment trick
+                            Text(
+                              'Profile',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            _LogoutButton(
+                              color: Colors.white24,
+                              iconColor: Colors.white,
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.white30,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const CircleAvatar(
+                            radius: 46,
+                            backgroundColor: Colors.white,
+                            backgroundImage: AssetImage(
+                              'assets/priti.jpeg',
+                            ), 
                           ),
                         ),
-                        _LogoutButton(
-                          color: Colors.white24,
-                          iconColor: Colors.white,
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Priti Sutradhar',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                          ),
                         ),
+                        const Text(
+                          '+91 70059 48459',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                        const Spacer(),
                       ],
                     ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.white30,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const CircleAvatar(
-                        radius: 46,
-                        backgroundColor: Colors.white,
-                        backgroundImage: AssetImage(
-                          'assets/priti.jpeg',
-                        ), // ✅ Added image
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Priti Sutradhar',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const Text(
-                      '+91 70059 48459',
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                    const Spacer(),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
 
-          // Body Content
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  _buildProfileOption(Icons.location_on_outlined, 'Addresses'),
-                  _buildProfileOption(Icons.history, 'Order History'),
-                  _buildProfileOption(
-                    Icons.account_balance_wallet_outlined,
-                    'Payment Report',
+              // Body Content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    children: [
+                      _buildProfileOption(Icons.location_on_outlined, 'Addresses'),
+                      _buildProfileOption(Icons.history, 'Order History'),
+                      _buildProfileOption(
+                        Icons.account_balance_wallet_outlined,
+                        'Payment Report',
+                      ),
+                      _buildProfileOption(
+                        Icons.notifications_outlined,
+                        'Notifications',
+                      ),
+                      _buildProfileOption(Icons.help_outline, 'Help & Support'),
+                      _buildProfileOption(Icons.info_outline, 'About Us'),
+                    ],
                   ),
-                  _buildProfileOption(
-                    Icons.notifications_outlined,
-                    'Notifications',
-                  ),
-                  _buildProfileOption(Icons.help_outline, 'Help & Support'),
-                  _buildProfileOption(Icons.info_outline, 'About Us'),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),

@@ -15,13 +15,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
+    // Animation Duration: 2 seconds per cycle
     _controller = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     )..repeat(reverse: true);
+    
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
 
-    Timer(const Duration(seconds: 3), () {
+    // Navigate to Language Screen after 4 seconds
+    Timer(const Duration(seconds: 4), () {
       Navigator.pushReplacementNamed(context, '/language');
     });
   }
@@ -35,58 +38,73 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF059669), Color(0xFF064E3B)], // Emerald 600 to 900
+      body: Stack(
+        fit: StackFit.expand, // Ensures the background fills the screen
+        children: [
+          // 1. BACKGROUND IMAGE
+          Image.asset(
+            'assets/splash screen.png',
+            fit: BoxFit.cover, // Covers the entire screen
           ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ScaleTransition(
-                scale: _animation,
-                child: Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 20,
-                        spreadRadius: 5,
+
+          // 2. OPTIONAL: Dark Overlay (To ensure text/logo pops if background is too bright)
+          Container(
+            color: Colors.black.withOpacity(0.2),
+          ),
+
+          // 3. MAIN CONTENT (Logo & Text)
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Animated Logo
+                ScaleTransition(
+                  scale: _animation,
+                  child: Container(
+                    width: 160, 
+                    height: 160,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 25,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/logo.png',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40),
+                
+                // Tagline
+                Text(
+                  'Clean India, Earn India',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withOpacity(0.9),
+                    letterSpacing: 1.2,
+                    shadows: const [
+                      Shadow(
+                        color: Colors.black26,
+                        offset: Offset(0, 2),
+                        blurRadius: 4,
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.recycling, size: 64, color: Color(0xFF059669)),
                 ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'TrashKari',
-                style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                  letterSpacing: -1.0,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Clean India, Earn India',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.white.withOpacity(0.9),
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
