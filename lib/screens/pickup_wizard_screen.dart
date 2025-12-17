@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:ui'; // Required for BackdropFilter
 
 class PickupWizardScreen extends StatefulWidget {
   const PickupWizardScreen({super.key});
@@ -18,8 +17,9 @@ class _PickupWizardScreenState extends State<PickupWizardScreen> {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // 1. GLOBAL BACKGROUND (Deep Forest Theme)
+          // 1. GLOBAL BACKGROUND (Header Background)
           Container(
+            height: MediaQuery.of(context).size.height * 0.35, // Top 35% is green
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -42,90 +42,99 @@ class _PickupWizardScreenState extends State<PickupWizardScreen> {
               ),
             ),
           ),
-          Positioned(
-            bottom: 100,
-            right: -50,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFF34D399).withOpacity(0.1),
-              ),
-            ),
-          ),
 
           // 3. MAIN CONTENT
-          SafeArea(
-            child: Column(
-              children: [
-                // --- CUSTOM HEADER ---
-                Padding(
+          Column(
+            children: [
+              // --- HEADER SECTION (GREEN) ---
+              SafeArea(
+                bottom: false,
+                child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: Row(
+                  child: Column(
                     children: [
-                      _GlassBackButton(onTap: () {
-                         if(_currentStep > 1) setState(() => _currentStep--);
-                         else Navigator.pop(context);
-                      }),
-                      Expanded(
-                        child: Text(
-                          _currentStep < 3 ? 'New Pickup' : 'Success',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
+                      Row(
+                        children: [
+                          _HeaderBackButton(onTap: () {
+                             if(_currentStep > 1) setState(() => _currentStep--);
+                             else Navigator.pop(context);
+                          }),
+                          Expanded(
+                            child: Text(
+                              _currentStep < 3 ? 'New Pickup' : 'Success',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 40), // Balance the back button
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 20),
+
+                      // --- PROGRESS INDICATOR ---
+                      if (_currentStep < 3)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            children: List.generate(2, (index) {
+                              bool isActive = _currentStep > index;
+                              return Expanded(
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 300),
+                                  height: 6,
+                                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                                  decoration: BoxDecoration(
+                                    color: isActive ? const Color(0xFF34D399) : Colors.white24,
+                                    borderRadius: BorderRadius.circular(4),
+                                    boxShadow: isActive ? [
+                                      BoxShadow(
+                                        color: const Color(0xFF34D399).withOpacity(0.4),
+                                        blurRadius: 8,
+                                      )
+                                    ] : [],
+                                  ),
+                                ),
+                              );
+                            }),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 40), // Balance the back button
+                      const SizedBox(height: 10),
                     ],
                   ),
                 ),
+              ),
 
-                // --- PROGRESS INDICATOR ---
-                if (_currentStep < 3)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                    child: Row(
-                      children: List.generate(2, (index) {
-                        bool isActive = _currentStep > index;
-                        return Expanded(
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            height: 6,
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            decoration: BoxDecoration(
-                              color: isActive ? const Color(0xFF34D399) : Colors.white24,
-                              borderRadius: BorderRadius.circular(4),
-                              boxShadow: isActive ? [
-                                BoxShadow(
-                                  color: const Color(0xFF34D399).withOpacity(0.4),
-                                  blurRadius: 8,
-                                )
-                              ] : [],
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
+              // --- WHITE BODY SECTION ---
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
                   ),
-
-                // --- DYNAMIC STEP CONTENT ---
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    physics: const BouncingScrollPhysics(),
-                    child: _buildStepContent(),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          padding: const EdgeInsets.fromLTRB(24, 30, 24, 20),
+                          child: _buildStepContent(),
+                        ),
+                      ),
+                      
+                      // --- BOTTOM ACTION BAR (WHITE) ---
+                      _buildBottomBar(),
+                    ],
                   ),
                 ),
-
-                // --- BOTTOM ACTION BAR ---
-                _buildBottomBar(),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
@@ -133,39 +142,39 @@ class _PickupWizardScreenState extends State<PickupWizardScreen> {
   }
 
   Widget _buildBottomBar() {
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: const Color(0xFF064E3B).withOpacity(0.6),
-            border: Border(top: BorderSide(color: Colors.white.withOpacity(0.1))),
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
           ),
-          child: SizedBox(
-            width: double.infinity,
-            height: 56,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF34D399),
-                foregroundColor: const Color(0xFF064E3B),
-                elevation: 0,
-                shadowColor: const Color(0xFF34D399).withOpacity(0.4),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              ),
-              onPressed: () {
-                if (_currentStep < 3) {
-                  setState(() => _currentStep++);
-                } else {
-                  Navigator.pushNamedAndRemoveUntil(context, '/user_home', (route) => false);
-                }
-              },
-              child: Text(
-                _currentStep < 3 ? 'Continue' : 'Back to Dashboard',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5),
-              ),
-            ),
+        ],
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF064E3B), // Deep Green Button
+            foregroundColor: Colors.white,
+            elevation: 10,
+            shadowColor: const Color(0xFF064E3B).withOpacity(0.4),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+          onPressed: () {
+            if (_currentStep < 3) {
+              setState(() => _currentStep++);
+            } else {
+              Navigator.pushNamedAndRemoveUntil(context, '/user_home', (route) => false);
+            }
+          },
+          child: Text(
+            _currentStep < 3 ? 'Continue' : 'Back to Dashboard',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5),
           ),
         ),
       ),
@@ -178,58 +187,65 @@ class _PickupWizardScreenState extends State<PickupWizardScreen> {
     return _buildStep3();
   }
 
-  // ================== STEP 1: QUANTITY ==================
+  // ================== STEP 1: QUANTITY (LIGHT THEME) ==================
   Widget _buildStep1() {
     int estValue = (_quantity * 12).round();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("CATEGORY", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white54, letterSpacing: 1)),
+        const Text("CATEGORY", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
         const SizedBox(height: 8),
         Row(children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.orange.withOpacity(0.2),
+              color: Colors.orange.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.water_drop, color: Colors.orange, size: 28),
           ),
           const SizedBox(width: 12),
-          const Text("Plastic Waste", style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Colors.white)),
+          const Text("Plastic Waste", style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Color(0xFF064E3B))),
         ]),
         const SizedBox(height: 30),
         
-        // --- QUANTITY CARD (GLASS) ---
-        _GlassContainer(
+        // --- QUANTITY CARD (LIGHT) ---
+        Container(
           padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.grey[200]!),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 5)),
+            ],
+          ),
           child: Column(
             children: [
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                const Text("Est. Quantity", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white70)),
+                const Text("Est. Quantity", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF34D399).withOpacity(0.2),
+                    color: const Color(0xFF34D399).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFF34D399).withOpacity(0.3)),
                   ),
-                  child: Text(" ₹$estValue", style: const TextStyle(color: Color(0xFF34D399), fontWeight: FontWeight.bold)),
+                  child: Text(" ₹$estValue", style: const TextStyle(color: Color(0xFF064E3B), fontWeight: FontWeight.bold)),
                 )
               ]),
               const SizedBox(height: 24),
               Text(
                 "${_quantity.toInt()} KG", 
-                style: const TextStyle(fontSize: 56, fontWeight: FontWeight.w900, color: Colors.white, height: 1.0)
+                style: const TextStyle(fontSize: 56, fontWeight: FontWeight.w900, color: Color(0xFF064E3B), height: 1.0)
               ),
               const SizedBox(height: 20),
               
-              // Custom Slider Theme
+              // Slider
               SliderTheme(
                 data: SliderTheme.of(context).copyWith(
-                  activeTrackColor: const Color(0xFF34D399),
-                  inactiveTrackColor: Colors.white12,
-                  thumbColor: Colors.white,
+                  activeTrackColor: const Color(0xFF064E3B),
+                  inactiveTrackColor: Colors.grey[200],
+                  thumbColor: const Color(0xFF34D399),
                   trackHeight: 6,
                   overlayColor: const Color(0xFF34D399).withOpacity(0.2),
                 ),
@@ -239,24 +255,24 @@ class _PickupWizardScreenState extends State<PickupWizardScreen> {
                 ),
               ),
               const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Text("1 kg", style: TextStyle(fontSize: 12, color: Colors.white38)),
-                Text("50 kg", style: TextStyle(fontSize: 12, color: Colors.white38)),
+                Text("1 kg", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                Text("50 kg", style: TextStyle(fontSize: 12, color: Colors.grey)),
               ])
             ],
           ),
         ),
         const SizedBox(height: 30),
         
-        const Text("VERIFICATION", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white54, letterSpacing: 1)),
+        const Text("VERIFICATION", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
         const SizedBox(height: 12),
         
-        // --- UPLOAD BOX (GLASS) ---
+        // --- UPLOAD BOX (LIGHT) ---
         Container(
           height: 120,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
-            border: Border.all(color: Colors.white24),
+            color: Colors.grey[50],
+            border: Border.all(color: Colors.grey[300]!, style: BorderStyle.solid), // Dashed border preferred if package allowed
             borderRadius: BorderRadius.circular(20),
           ),
           child: Column(
@@ -268,10 +284,10 @@ class _PickupWizardScreenState extends State<PickupWizardScreen> {
                   color: const Color(0xFF34D399).withOpacity(0.1),
                   shape: BoxShape.circle
                 ),
-                child: const Icon(Icons.camera_alt, color: Color(0xFF34D399), size: 28),
+                child: const Icon(Icons.camera_alt, color: Color(0xFF064E3B), size: 28),
               ),
               const SizedBox(height: 12),
-              const Text("Upload Photo", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white70)),
+              const Text("Upload Photo", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
             ],
           ),
         )
@@ -279,36 +295,42 @@ class _PickupWizardScreenState extends State<PickupWizardScreen> {
     );
   }
 
-  // ================== STEP 2: SCHEDULE ==================
+  // ================== STEP 2: SCHEDULE (LIGHT THEME) ==================
   Widget _buildStep2() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("When & Where?", style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white)),
-        const Text("Select a convenient slot.", style: TextStyle(color: Colors.white54, fontSize: 16)),
+        const Text("When & Where?", style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Color(0xFF064E3B))),
+        const Text("Select a convenient slot.", style: TextStyle(color: Colors.grey, fontSize: 16)),
         const SizedBox(height: 30),
         
-        // --- ADDRESS CARD (GLASS) ---
-        _GlassContainer(
+        // --- ADDRESS CARD (LIGHT) ---
+        Container(
           padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.grey[200]!),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))],
+          ),
           child: Row(children: [
             Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: const Color(0xFF34D399).withOpacity(0.15), shape: BoxShape.circle),
-              child: const Icon(Icons.location_on, color: Color(0xFF34D399), size: 24),
+              decoration: BoxDecoration(color: const Color(0xFF34D399).withOpacity(0.1), shape: BoxShape.circle),
+              child: const Icon(Icons.location_on, color: Color(0xFF064E3B), size: 24),
             ),
             const SizedBox(width: 16),
             const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text("PICKUP ADDRESS", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white54, letterSpacing: 1)),
+              Text("PICKUP ADDRESS", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
               SizedBox(height: 4),
-              Text("Home (Sector 4)", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
-              Text("#102, Green Valley Apts", style: TextStyle(color: Colors.white70, fontSize: 12)),
+              Text("Ms Priti Sutradhar", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF064E3B))),
+              Text("Silchar, Assam", style: TextStyle(color: Colors.grey, fontSize: 12)),
             ])
           ]),
         ),
         const SizedBox(height: 24),
         
-        const Text("Select Date", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        const Text("Select Date", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF064E3B))),
         const SizedBox(height: 12),
         Row(children: [
           _optionBtn("Today", false),
@@ -319,27 +341,27 @@ class _PickupWizardScreenState extends State<PickupWizardScreen> {
         ]),
         const SizedBox(height: 24),
         
-        const Text("Time Slot", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        const Text("Time Slot", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF064E3B))),
         const SizedBox(height: 12),
         
-        // --- TIME SLOT (ACTIVE GLASS) ---
+        // --- TIME SLOT (LIGHT) ---
         Container(
           width: double.infinity, padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF34D399).withOpacity(0.15),
+            color: const Color(0xFF34D399).withOpacity(0.1),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF34D399).withOpacity(0.5)),
+            border: Border.all(color: const Color(0xFF34D399).withOpacity(0.3)),
           ),
           child: const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Text("09:00 AM - 12:00 PM", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF34D399), fontSize: 16)),
-            Icon(Icons.check_circle, color: Color(0xFF34D399))
+            Text("09:00 AM - 12:00 PM", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF064E3B), fontSize: 16)),
+            Icon(Icons.check_circle, color: Color(0xFF064E3B))
           ]),
         )
       ],
     );
   }
 
-  // ================== STEP 3: SUCCESS ==================
+  // ================== STEP 3: SUCCESS (LIGHT THEME) ==================
   Widget _buildStep3() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -351,9 +373,6 @@ class _PickupWizardScreenState extends State<PickupWizardScreen> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: const Color(0xFF34D399).withOpacity(0.1),
-            boxShadow: [
-              BoxShadow(color: const Color(0xFF34D399).withOpacity(0.2), blurRadius: 40, spreadRadius: 10),
-            ],
           ),
           child: Center(
             child: Container(
@@ -367,16 +386,21 @@ class _PickupWizardScreenState extends State<PickupWizardScreen> {
           ),
         ),
         const SizedBox(height: 30),
-        const Text("Request Sent !", style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white)),
-        const Text("Partner will arrive tomorrow.", style: TextStyle(color: Colors.white60, fontSize: 16)),
+        const Text("Request Sent !", style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Color(0xFF064E3B))),
+        const Text("Partner will arrive tomorrow.", style: TextStyle(color: Colors.grey, fontSize: 16)),
         const SizedBox(height: 40),
         
-        // --- SUMMARY CARD (GLASS) ---
-        _GlassContainer(
+        // --- SUMMARY CARD (LIGHT) ---
+        Container(
           padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.grey[200]!),
+          ),
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            const Text("Est. Value", style: TextStyle(color: Colors.white70, fontSize: 16)),
-            Text("₹${(_quantity * 12).toInt()}", style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Color(0xFF34D399))),
+            const Text("Est. Value", style: TextStyle(color: Colors.grey, fontSize: 16, fontWeight: FontWeight.bold)),
+            Text("₹${(_quantity * 12).toInt()}", style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Color(0xFF064E3B))),
           ]),
         ),
         const SizedBox(height: 20),
@@ -389,16 +413,16 @@ class _PickupWizardScreenState extends State<PickupWizardScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFF34D399) : Colors.white.withOpacity(0.05),
-          border: Border.all(color: selected ? const Color(0xFF34D399) : Colors.white12),
-          borderRadius: BorderRadius.circular(16)
+          color: selected ? const Color(0xFF064E3B) : Colors.grey[100],
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: selected ? const Color(0xFF064E3B) : Colors.transparent),
         ),
         child: Center(
           child: Text(
             text, 
             style: TextStyle(
               fontWeight: FontWeight.bold, 
-              color: selected ? const Color(0xFF064E3B) : Colors.white70
+              color: selected ? Colors.white : Colors.black54
             )
           )
         ),
@@ -409,34 +433,9 @@ class _PickupWizardScreenState extends State<PickupWizardScreen> {
 
 // ================== HELPER WIDGETS ==================
 
-class _GlassContainer extends StatelessWidget {
-  final Widget child;
-  final EdgeInsets padding;
-  const _GlassContainer({required this.child, required this.padding});
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
-            border: Border.all(color: Colors.white.withOpacity(0.1)),
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: child,
-        ),
-      ),
-    );
-  }
-}
-
-class _GlassBackButton extends StatelessWidget {
+class _HeaderBackButton extends StatelessWidget {
   final VoidCallback onTap;
-  const _GlassBackButton({required this.onTap});
+  const _HeaderBackButton({required this.onTap});
 
   @override
   Widget build(BuildContext context) {

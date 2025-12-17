@@ -173,7 +173,7 @@ class OtpScreen extends StatelessWidget {
                         ),
                         onPressed: () {
                           if (role == 'user') {
-                            Navigator.pushNamedAndRemoveUntil(context, '/user_home', (route) => false);
+                            Navigator.pushNamedAndRemoveUntil(context, '/kyc', (route) => false);
                           } else {
                             Navigator.pushNamedAndRemoveUntil(context, '/partner_home', (route) => false);
                           }

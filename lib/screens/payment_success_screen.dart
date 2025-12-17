@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:ui'; // Required for BackdropFilter
 
 class PaymentSuccessScreen extends StatelessWidget {
   const PaymentSuccessScreen({super.key});
@@ -9,8 +8,9 @@ class PaymentSuccessScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // 1. GLOBAL BACKGROUND
+          // 1. GLOBAL BACKGROUND (Header Background)
           Container(
+            height: MediaQuery.of(context).size.height * 0.45, // Slightly larger header for the success icon
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -25,161 +25,167 @@ class PaymentSuccessScreen extends StatelessWidget {
             top: -100, right: -100,
             child: Container(
               width: 300, height: 300,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF10B981).withOpacity(0.15),),
+              decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF10B981).withOpacity(0.15)),
             ),
           ),
           Positioned(
-            bottom: 100, left: -50,
+            top: 100, left: -50,
             child: Container(
-              width: 250, height: 250,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF34D399).withOpacity(0.1),),
+              width: 200, height: 200,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF34D399).withOpacity(0.1)),
             ),
           ),
 
           // 3. MAIN CONTENT
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(30.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Spacer(),
-                  
-                  // --- SUCCESS ICON WITH GLOW ---
-                  Container(
-                    padding: const EdgeInsets.all(30),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF34D399), Color(0xFF059669)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF34D399).withOpacity(0.4),
-                          blurRadius: 30,
-                          spreadRadius: 10,
+          Column(
+            children: [
+              // --- HEADER SECTION ---
+              SafeArea(
+                bottom: false,
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.4,
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // --- SUCCESS ICON WITH GLOW ---
+                      Container(
+                        padding: const EdgeInsets.all(30),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF34D399), Color(0xFF059669)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF34D399).withOpacity(0.4),
+                              blurRadius: 30,
+                              spreadRadius: 10,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: const Icon(Icons.check_rounded, size: 60, color: Colors.white),
+                        child: const Icon(Icons.check_rounded, size: 60, color: Colors.white),
+                      ),
+                      
+                      const SizedBox(height: 30),
+                      
+                      // --- TEXT ---
+                      const Text(
+                        "Payment Sent!",
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: -1,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        "₹66 added to user's wallet.",
+                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      ),
+                    ],
                   ),
-                  
-                  const SizedBox(height: 40),
-                  
-                  // --- TEXT ---
-                  const Text(
-                    "Payment Sent!",
-                    style: TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      letterSpacing: -1,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    "₹66 added to user's wallet.",
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
-                  ),
-                  
-                  const SizedBox(height: 40),
+                ),
+              ),
 
-                  // --- DIGITAL RECEIPT (GLASS) ---
-                  _GlassContainer(
-                    padding: const EdgeInsets.all(24),
+              // --- WHITE BODY SECTION ---
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(30.0),
                     child: Column(
                       children: [
-                        _buildReceiptRow("Transaction ID", "#TRX9982", isMono: true),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16.0),
-                          child: Divider(color: Colors.white12),
+                        const SizedBox(height: 20),
+                        
+                        // --- DIGITAL RECEIPT (LIGHT) ---
+                        Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: Colors.grey[200]!),
+                            boxShadow: [
+                              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 10))
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              _buildReceiptRowLight("Transaction ID", "#TRX9982", isMono: true),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 20.0),
+                                child: Divider(color: Colors.grey[300], thickness: 1),
+                              ),
+                              _buildReceiptRowLight("Total Paid", "₹66.00", isLarge: true),
+                              const SizedBox(height: 12),
+                              _buildReceiptRowLight("Total Weight", "5.5 KG"),
+                            ],
+                          ),
                         ),
-                        _buildReceiptRow("Total Paid", "₹66.00", isLarge: true),
-                        const SizedBox(height: 12),
-                        _buildReceiptRow("Total Weight", "5.5 KG"),
+
+                        const Spacer(),
+
+                        // --- ACTION BUTTON ---
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF064E3B), // Deep Green Button
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              elevation: 10,
+                              shadowColor: const Color(0xFF064E3B).withOpacity(0.4),
+                            ),
+                            onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/partner_home', (route) => false),
+                            child: const Text(
+                              "Back to Dashboard",
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
-
-                  const Spacer(),
-
-                  // --- ACTION BUTTON ---
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFF064E3B),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        elevation: 10,
-                      ),
-                      onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/partner_home', (route) => false),
-                      child: const Text(
-                        "Back to Dashboard",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildReceiptRow(String label, String value, {bool isMono = false, bool isLarge = false}) {
+  Widget _buildReceiptRowLight(String label, String value, {bool isMono = false, bool isLarge = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
           style: TextStyle(
-            color: Colors.white60,
+            color: Colors.grey,
             fontSize: isLarge ? 16 : 14,
+            fontWeight: FontWeight.w500,
           ),
         ),
         Text(
           value,
           style: TextStyle(
-            color: isLarge ? const Color(0xFF34D399) : Colors.white,
+            color: isLarge ? const Color(0xFF064E3B) : Colors.black87,
             fontSize: isLarge ? 24 : 14,
             fontWeight: isLarge ? FontWeight.w900 : FontWeight.bold,
             fontFamily: isMono ? 'Monospace' : null,
           ),
         ),
       ],
-    );
-  }
-}
-
-// ================== HELPER WIDGETS ==================
-
-class _GlassContainer extends StatelessWidget {
-  final Widget child;
-  final EdgeInsets padding;
-  const _GlassContainer({required this.child, required this.padding});
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
-            border: Border.all(color: Colors.white.withOpacity(0.1)),
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: child,
-        ),
-      ),
     );
   }
 }

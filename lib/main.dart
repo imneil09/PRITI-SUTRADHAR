@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:trashkari/screens/partner_confirmation_screen.dart';
 import 'package:trashkari/screens/partner_register.dart';
+import 'package:trashkari/screens/user_kyc_screen.dart';
 
 import 'screens/splash_screen.dart';
 import 'screens/language_screen.dart';
@@ -74,6 +76,8 @@ class TrashKariApp extends StatelessWidget {
         '/partner_payment': (context) => const PartnerPaymentScreen(),
         '/payment_success': (context) => const PaymentSuccessScreen(),
         '/partner_register': (context) => const PartnerRegistrationScreen(),
+        '/kyc': (context) => const UserKycScreen(),
+        '/partner_confirmation': (context) => const PartnerConfirmationScreen(),        
       },
     );
   }

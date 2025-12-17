@@ -17,14 +17,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     super.initState();
     // Animation Duration: 2 seconds per cycle
     _controller = AnimationController(
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 4),
       vsync: this,
     )..repeat(reverse: true);
     
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
 
     // Navigate to Language Screen after 4 seconds
-    Timer(const Duration(seconds: 4), () {
+    Timer(const Duration(seconds: 7), () {
       Navigator.pushReplacementNamed(context, '/language');
     });
   }
